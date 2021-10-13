@@ -11,7 +11,7 @@ pipeline {
 
   parameters {
         string(name: 'BUILD_NUMBER', defaultValue: '', description: 'Build number of job that has installed the cluster.')
-        string(name:'JENKINS_AGENT_LABEL',defaultValue:'oc49',description:
+        string(name:'JENKINS_AGENT_LABEL',defaultValue:'oc49 || oc48 || oc47',description:
         '''
         scale-ci-static: for static agent that is specific to scale-ci, useful when the jenkins dynamic agent
  isn't stable<br>
