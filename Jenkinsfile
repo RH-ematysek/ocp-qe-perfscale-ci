@@ -31,65 +31,15 @@ pipeline {
                SOMEVARn='envn-test'<br>
                </p>'''
             )
-        string(name: 'E2E_BENCHMARKING_REPO', defaultValue:'https://github.com/cloud-bulldozer/e2e-benchmarking', description:'You can change this to point to your fork if needed.')
-        string(name: 'E2E_BENCHMARKING_REPO_BRANCH', defaultValue:'master', description:'You can change this to point to a branch on your fork if needed.')
+        string(name: 'WORKLOADS_REPO', defaultValue:'https://github.com/RH-ematysek/workloads', description:'You can change this to point to your fork if needed.')
+        string(name: 'WORKLOADS_REPO_BRANCH', defaultValue:'logtest_v45', description:'You can change this to point to a branch on your fork if needed.')
     }
 
   stages {
-    stage('Run Cluster-Density'){
+    stage('Checkout workload repo'){
       agent { label params['JENKINS_AGENT_LABEL'] }
       steps{
-        script{
-          if(params.SCALE_UP.toInteger() > 0) {
-            build job: 'scale-ci/e2e-benchmarking-multibranch-pipeline/cluster-workers-scaling', parameters: [string(name: 'BUILD_NUMBER', value: BUILD_NUMBER), string(name: 'WORKER_COUNT', value: SCALE_UP), string(name: 'JENKINS_AGENT_LABEL', value: JENKINS_AGENT_LABEL)]
-          }
-        }
-        deleteDir()
-        checkout([
-          $class: 'GitSCM',
-          branches: [[name: params.E2E_BENCHMARKING_REPO_BRANCH ]],
-          doGenerateSubmoduleConfigurations: false,
-          userRemoteConfigs: [[url: params.E2E_BENCHMARKING_REPO ]
-          ]])
-
-        copyArtifacts(
-            filter: '',
-            fingerprintArtifacts: true,
-            projectName: 'ocp-common/Flexy-install',
-            selector: specific(params.BUILD_NUMBER),
-            target: 'flexy-artifacts'
-        )
-        script {
-          buildinfo = readYaml file: "flexy-artifacts/BUILDINFO.yml"
-          currentBuild.displayName = "${currentBuild.displayName}-${params.BUILD_NUMBER}"
-          currentBuild.description = "Copying Artifact from Flexy-install build <a href=\"${buildinfo.buildUrl}\">Flexy-install#${params.BUILD_NUMBER}</a>"
-          buildinfo.params.each { env.setProperty(it.key, it.value) }
-        }
-        ansiColor('xterm') {
-          sh label: '', script: '''
-          # Get ENV VARS Supplied by the user to this job and store in .env_override
-          echo "$ENV_VARS" > .env_override
-          # Export those env vars so they could be used by CI Job
-          set -a && source .env_override && set +a
-          mkdir -p ~/.kube
-          cp $WORKSPACE/flexy-artifacts/workdir/install-dir/auth/kubeconfig ~/.kube/config
-          oc config view
-          oc projects
-          ls -ls ~/.kube/
-          env
-          cd workloads/kube-burner
-          ./run_clusterdensity_test_fromgit.sh
-          rm -rf ~/.kube
-          '''
-        }
-
-        script{
-          // if the build fails, scale down will not happen, letting user review and decide if cluster is ready for scale down or re-run the job on same cluster
-          if(params.SCALE_DOWN.toInteger() > 0) {
-            build job: 'scale-ci/e2e-benchmarking-multibranch-pipeline/cluster-workers-scaling', parameters: [string(name: 'BUILD_NUMBER', value: BUILD_NUMBER), string(name: 'WORKER_COUNT', value: SCALE_DOWN), string(name: 'JENKINS_AGENT_LABEL', value: JENKINS_AGENT_LABEL)]
-        }
-      }
-
+        git branch: params.WORKLOADS_REPO_BRANCH, url: params.WORKLOADS_REPO
       }
     }
   }
