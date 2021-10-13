@@ -42,6 +42,24 @@ pipeline {
         git branch: params.WORKLOADS_REPO_BRANCH, url: params.WORKLOADS_REPO
       }
     }
+    stage('Copy artifacts'){
+      agent { label params['JENKINS_AGENT_LABEL'] }
+      steps{
+        copyArtifacts(
+            filter: '',
+            fingerprintArtifacts: true,
+            projectName: 'ocp-common/Flexy-install',
+            selector: specific(params.BUILD_NUMBER),
+            target: 'flexy-artifacts'
+        )
+        script {
+          buildinfo = readYaml file: "flexy-artifacts/BUILDINFO.yml"
+          currentBuild.displayName = "${currentBuild.displayName}-${params.BUILD_NUMBER}"
+          currentBuild.description = "Copying Artifact from Flexy-install build <a href=\"${buildinfo.buildUrl}\">Flexy-install#${params.BUILD_NUMBER}</a>"
+          buildinfo.params.each { env.setProperty(it.key, it.value) }
+        }
+      }
+    }
   }
 }
 
