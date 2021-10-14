@@ -39,11 +39,6 @@ pipeline {
     stage('Sequential'){
       agent { label params['JENKINS_AGENT_LABEL'] }
       stages{
-        stage('Checkout workload repo'){
-          steps{
-            git branch: params.WORKLOADS_REPO_BRANCH, url: params.WORKLOADS_REPO
-          }
-        }
         stage('Copy artifacts'){
           steps{
             copyArtifacts(
@@ -59,6 +54,11 @@ pipeline {
               currentBuild.description = "Copying Artifact from Flexy-install build <a href=\"${buildinfo.buildUrl}\">Flexy-install#${params.BUILD_NUMBER}</a>"
               buildinfo.params.each { env.setProperty(it.key, it.value) }
             }
+          }
+        }
+        stage('Checkout workload repo'){
+          steps{
+            git branch: params.WORKLOADS_REPO_BRANCH, url: params.WORKLOADS_REPO
           }
         }
         stage('Source ENV and kubeconfig'){
