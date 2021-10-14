@@ -36,30 +36,53 @@ pipeline {
     }
 
   stages {
-    stage('Checkout workload repo'){
+    stage('Sequential'){
       agent { label params['JENKINS_AGENT_LABEL'] }
-      steps{
-        git branch: params.WORKLOADS_REPO_BRANCH, url: params.WORKLOADS_REPO
-      }
-    }
-    stage('Copy artifacts'){
-      agent { label params['JENKINS_AGENT_LABEL'] }
-      steps{
-        copyArtifacts(
-            filter: '',
-            fingerprintArtifacts: true,
-            projectName: 'ocp-common/Flexy-install',
-            selector: specific(params.BUILD_NUMBER),
-            target: 'flexy-artifacts'
-        )
-        script {
-          buildinfo = readYaml file: "flexy-artifacts/BUILDINFO.yml"
-          currentBuild.displayName = "${currentBuild.displayName}-${params.BUILD_NUMBER}"
-          currentBuild.description = "Copying Artifact from Flexy-install build <a href=\"${buildinfo.buildUrl}\">Flexy-install#${params.BUILD_NUMBER}</a>"
-          buildinfo.params.each { env.setProperty(it.key, it.value) }
+      stages{
+        stage('Checkout workload repo'){
+          steps{
+            git branch: params.WORKLOADS_REPO_BRANCH, url: params.WORKLOADS_REPO
+          }
+        }
+        stage('Copy artifacts'){
+          steps{
+            copyArtifacts(
+                filter: '',
+                fingerprintArtifacts: true,
+                projectName: 'ocp-common/Flexy-install',
+                selector: specific(params.BUILD_NUMBER),
+                target: 'flexy-artifacts'
+            )
+            script {
+              buildinfo = readYaml file: "flexy-artifacts/BUILDINFO.yml"
+              currentBuild.displayName = "${currentBuild.displayName}-${params.BUILD_NUMBER}"
+              currentBuild.description = "Copying Artifact from Flexy-install build <a href=\"${buildinfo.buildUrl}\">Flexy-install#${params.BUILD_NUMBER}</a>"
+              buildinfo.params.each { env.setProperty(it.key, it.value) }
+            }
+          }
+        }
+        stage('test'){
+          steps{
+            ansiColor('xterm') {
+              sh label: '', script: '''
+              # Get ENV VARS Supplied by the user to this job and store in .env_override
+              echo "$ENV_VARS" > .env_override
+              # Export those env vars so they could be used by CI Job
+              set -a && source .env_override && set +a
+              mkdir -p ~/.kube
+              cp $WORKSPACE/flexy-artifacts/workdir/install-dir/auth/kubeconfig ~/.kube/config
+              oc config view
+              #oc projects
+              ls -ls ~/.kube/
+              #env
+              ls -l
+              '''
+            }
+          }
         }
       }
     }
+
   }
 }
 
