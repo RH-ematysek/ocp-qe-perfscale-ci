@@ -61,7 +61,7 @@ pipeline {
             }
           }
         }
-        stage('test'){
+        stage('Source ENV and kubeconfig'){
           steps{
             ansiColor('xterm') {
               sh label: '', script: '''
@@ -71,12 +71,21 @@ pipeline {
               set -a && source .env_override && set +a
               mkdir -p ~/.kube
               cp $WORKSPACE/flexy-artifacts/workdir/install-dir/auth/kubeconfig ~/.kube/config
-              oc version
               #oc config view
               #oc projects
               ls -ls ~/.kube/
               #env
+              oc version
               ansible --version
+              '''
+            }
+          }
+        }
+        stage('Run Workload'){
+          steps{
+            ansiColor('xterm') {
+              sh label: '', script: '''
+              echo "run test"
               '''
             }
           }
