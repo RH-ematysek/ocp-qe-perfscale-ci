@@ -66,9 +66,17 @@ pipeline {
               ls -ls ~/.kube/
               #env
               oc version
+              oc project default
               ansible --version
               python --version
               python3 --version
+              whoami
+
+              ls -la
+
+              echo -e "[orchestration]\nlocalhost ansible_connection=local" > inventory
+              cat inventory
+              ORCHESTRATION_USER="$(whoami)" LABEL_ALL_NODES=False NUM_PROJECTS=1 NUM_LINES=1200000 RATE=60000 ansible-playbook -v -i inventory workloads/logging.yml -v --skip-tags label_node,clear_buffers,delete_indices
               '''
             }
           }
