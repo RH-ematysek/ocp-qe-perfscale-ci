@@ -22,7 +22,7 @@ pipeline {
                </p>'''
             )
         string(name: 'WORKLOADS_REPO', defaultValue:'https://github.com/RH-ematysek/workloads', description:'You can change this to point to your fork if needed.')
-        string(name: 'WORKLOADS_REPO_BRANCH', defaultValue:'logtest_v45', description:'You can change this to point to a branch on your fork if needed.')
+        string(name: 'WORKLOADS_REPO_BRANCH', defaultValue:'logtest_v45_svt', description:'You can change this to point to a branch on your fork if needed.')
     }
 
   stages {
