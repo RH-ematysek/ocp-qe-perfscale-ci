@@ -67,6 +67,8 @@ pipeline {
               #env
               oc version
               ansible --version
+              python --version
+              python3 --version
               '''
             }
           }
