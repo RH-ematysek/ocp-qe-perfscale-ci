@@ -23,6 +23,9 @@ pipeline {
             )
         string(name: 'WORKLOADS_REPO', defaultValue:'https://github.com/RH-ematysek/workloads', description:'You can change this to point to your fork if needed.')
         string(name: 'WORKLOADS_REPO_BRANCH', defaultValue:'logtest_v45_svt', description:'You can change this to point to a branch on your fork if needed.')
+        string(name: 'NUM_PROJECTS', defaultValue:'1', description:'Number of logtest projects to create')
+        string(name: 'RATE', defaultValue:'120000', description:'Number of logs to generate per minute per project. Default: 2k/s')
+        string(name: 'NUM_LINES', defaultValue:'3600000', description:'Number of logs to generate before generator exits. Default: 3.6 million for default 30 minute test')
     }
 
   stages {
@@ -64,7 +67,7 @@ pipeline {
               #oc config view
               #oc projects
               ls -ls ~/.kube/
-              #env
+              env
               oc version
               oc project default
               ansible --version
@@ -76,7 +79,7 @@ pipeline {
 
               echo -e "[orchestration]\nlocalhost ansible_connection=local" > inventory
               cat inventory
-              ORCHESTRATION_USER="$(whoami)" LABEL_ALL_NODES=False NUM_PROJECTS=1 NUM_LINES=1200000 RATE=60000 ansible-playbook -v -i inventory workloads/logging.yml -v --skip-tags label_node,clear_buffers,delete_indices
+              ORCHESTRATION_USER="$(whoami)" LABEL_ALL_NODES=False NUM_PROJECTS=$NUM_PROJECTS NUM_LINES=$NUM_LINES RATE=$RATE ansible-playbook -v -i inventory workloads/logging.yml -v --skip-tags label_node,clear_buffers,delete_indices
               '''
             }
           }
