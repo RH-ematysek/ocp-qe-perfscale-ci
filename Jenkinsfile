@@ -55,7 +55,7 @@ pipeline {
             git branch: params.WORKLOADS_REPO_BRANCH, url: params.WORKLOADS_REPO
           }
         }
-        stage('Source ENV and kubeconfig'){
+        stage('Source ENV/kubeconfig and run workload'){
           steps{
             ansiColor('xterm') {
               sh label: '', script: '''
@@ -85,7 +85,7 @@ pipeline {
             }
           }
         }
-        stage('Run Workload'){
+        stage('Placeholder'){
           steps{
             ansiColor('xterm') {
               sh label: '', script: '''
