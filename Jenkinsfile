@@ -27,6 +27,7 @@ pipeline {
         string(name: 'RATE', defaultValue:'120000', description:'Number of logs to generate per minute per project. Default: 2k/s')
         string(name: 'NUM_LINES', defaultValue:'3600000', description:'Number of logs to generate before generator exits. Default: 3.6 million for default 30 minute test')
         string(name: 'PROJECT_BASENAME', defaultValue:'logtest', description:'Project name prefix')
+        string(name: 'LABEL_NODES_INSTANCETYPE', defaultValue:'m5.xlarge', description:'Instance type to label with placement=logtest. Leave blank to skip this step. Note: labels ALL non master nodes that match the instance type')
     }
 
   stages {
@@ -77,6 +78,10 @@ pipeline {
               whoami
 
               ls -la
+
+              if [ -n $LABEL_NODES_INSTANCETYPE ]; then
+                for i in $(oc get machines -n openshift-machine-api -o json | jq -r '.items[] | select(.spec.providerSpec.value.instanceType == env.LABEL_NODES_INSTANCETYPE and .metadata.labels."machine.openshift.io/cluster-api-machine-role" != "master").status.nodeRef.name'); do oc label node "$i" placement=logtest; done
+              fi
 
               echo -e "[orchestration]\nlocalhost ansible_connection=local" > inventory
               cat inventory
