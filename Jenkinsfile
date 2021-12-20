@@ -87,7 +87,14 @@ pipeline {
 
               echo -e "[orchestration]\nlocalhost ansible_connection=local" > inventory
               cat inventory
-              ORCHESTRATION_USER="$(whoami)" LABEL_ALL_NODES=False NUM_PROJECTS=$NUM_PROJECTS NUM_LINES=$NUM_LINES RATE=$RATE PROJECT_BASENAME=$PROJECT_BASENAME ansible-playbook -v -i inventory workloads/logging.yml -v --skip-tags label_node,clear_buffers,delete_indices
+
+              if [ "$TEST_PRESET" = "SINGLE_NODE_2K" ]; then
+                echo
+              elif [ "$TEST_PRESET" = "SINGLE_NODE_2K" ]; then
+                echo
+              else
+                ORCHESTRATION_USER="$(whoami)" LABEL_ALL_NODES=False NUM_PROJECTS=$NUM_PROJECTS NUM_LINES=$NUM_LINES RATE=$RATE PROJECT_BASENAME=$PROJECT_BASENAME ansible-playbook -v -i inventory workloads/logging.yml -v --skip-tags label_node,clear_buffers,delete_indices
+              fi
               '''
             }
           }
