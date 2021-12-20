@@ -11,7 +11,15 @@ pipeline {
 
   parameters {
         string(name: 'BUILD_NUMBER', defaultValue: '', description: 'Build number of job that has installed the cluster.')
-        string(name:'JENKINS_AGENT_LABEL',defaultValue:'oc49 || oc48 || oc47')
+        string(name: 'JENKINS_AGENT_LABEL',defaultValue:'oc49 || oc48 || oc47')
+        choice(name: 'TEST_PRESET', choices: ['NONE', 'SINGLE_NODE_2K', 'MULTI_NODE_10K'], description: 'Preset test cases. Overrides NUM_PROJECTS, RATE, and NUM_LINES')
+        string(name: 'NUM_PROJECTS', defaultValue:'1', description:'Number of logtest projects to create')
+        string(name: 'RATE', defaultValue:'120000', description:'Number of logs to generate per minute per project. Default: 2k/s')
+        string(name: 'NUM_LINES', defaultValue:'3600000', description:'Number of logs to generate before generator exits. Default: 3.6 million for default 30 minute test')
+        string(name: 'PROJECT_BASENAME', defaultValue:'logtest', description:'Project name prefix')
+        string(name: 'LABEL_NODES_INSTANCETYPE', defaultValue:'m6i.xlarge', description:'Instance type to label with placement=logtest. Leave blank to skip this step. Note: labels ALL non master nodes that match the instance type')
+        string(name: 'WORKLOADS_REPO', defaultValue:'https://github.com/RH-ematysek/workloads', description:'You can change this to point to your fork if needed.')
+        string(name: 'WORKLOADS_REPO_BRANCH', defaultValue:'logtest_v45_svt', description:'You can change this to point to a branch on your fork if needed.')
         text(name: 'ENV_VARS', defaultValue: '', description:'''<p>
                Enter list of additional (optional) Env Vars you'd want to pass to the script, one pair on each line. <br>
                e.g.<br>
@@ -21,13 +29,6 @@ pipeline {
                SOMEVARn='envn-test'<br>
                </p>'''
             )
-        string(name: 'WORKLOADS_REPO', defaultValue:'https://github.com/RH-ematysek/workloads', description:'You can change this to point to your fork if needed.')
-        string(name: 'WORKLOADS_REPO_BRANCH', defaultValue:'logtest_v45_svt', description:'You can change this to point to a branch on your fork if needed.')
-        string(name: 'NUM_PROJECTS', defaultValue:'1', description:'Number of logtest projects to create')
-        string(name: 'RATE', defaultValue:'120000', description:'Number of logs to generate per minute per project. Default: 2k/s')
-        string(name: 'NUM_LINES', defaultValue:'3600000', description:'Number of logs to generate before generator exits. Default: 3.6 million for default 30 minute test')
-        string(name: 'PROJECT_BASENAME', defaultValue:'logtest', description:'Project name prefix')
-        string(name: 'LABEL_NODES_INSTANCETYPE', defaultValue:'m5.xlarge', description:'Instance type to label with placement=logtest. Leave blank to skip this step. Note: labels ALL non master nodes that match the instance type')
     }
 
   stages {
@@ -76,6 +77,7 @@ pipeline {
               python --version
               python3 --version
               whoami
+              echo PRESET: $TEST_PRESET
 
               ls -la
 
