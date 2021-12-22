@@ -17,7 +17,7 @@ pipeline {
         string(name: 'RATE', defaultValue:'120000', description:'Number of logs to generate per minute per project. Default: 2k/s')
         string(name: 'NUM_LINES', defaultValue:'3600000', description:'Number of logs to generate before generator exits. Default: 3.6 million for default 30 minute test')
         string(name: 'PROJECT_BASENAME', defaultValue:'logtest', description:'Project name prefix')
-        string(name: 'LABEL_NODES_INSTANCETYPE', defaultValue:'m6i.xlarge', description:'Instance type to label with placement=logtest. Leave blank to skip this step. Note: labels ALL non master nodes that match the instance type')
+        string(name: 'LABEL_NODES_INSTANCETYPE', defaultValue:'m6i.xlarge', description:'Instance type to label with placement=logtest. This label indicates which nodes will have logtest pods assigned to them. Leave blank to skip this step. Note: labels ALL non master nodes that match the instance type')
         string(name: 'WORKLOADS_REPO', defaultValue:'https://github.com/RH-ematysek/workloads', description:'You can change this to point to your fork if needed.')
         string(name: 'WORKLOADS_REPO_BRANCH', defaultValue:'logtest_v45_svt', description:'You can change this to point to a branch on your fork if needed.')
         text(name: 'ENV_VARS', defaultValue: '', description:'''<p>
@@ -89,9 +89,9 @@ pipeline {
               cat inventory
 
               if [ "$TEST_PRESET" = "SINGLE_NODE_2K" ]; then
-                echo
-              elif [ "$TEST_PRESET" = "SINGLE_NODE_2K" ]; then
-                echo
+                ORCHESTRATION_USER="$(whoami)" LABEL_ALL_NODES=False NUM_PROJECTS=1 NUM_LINES=3600000 RATE=120000 ansible-playbook -v -i inventory workloads/logging.yml -v --skip-tags label_node,clear_buffers,delete_indices
+              elif [ "$TEST_PRESET" = "MULTI_NODE_10K" ]; then
+                ORCHESTRATION_USER="$(whoami)" LABEL_ALL_NODES=False NUM_PROJECTS=10 NUM_LINES=1800000 RATE=60000 ansible-playbook -v -i inventory workloads/logging.yml -v --skip-tags label_node,clear_buffers,delete_indices
               else
                 ORCHESTRATION_USER="$(whoami)" LABEL_ALL_NODES=False NUM_PROJECTS=$NUM_PROJECTS NUM_LINES=$NUM_LINES RATE=$RATE PROJECT_BASENAME=$PROJECT_BASENAME ansible-playbook -v -i inventory workloads/logging.yml -v --skip-tags label_node,clear_buffers,delete_indices
               fi
