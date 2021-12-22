@@ -65,7 +65,7 @@ pipeline {
 
               echo -e "[orchestration]\nlocalhost ansible_connection=local" > inventory
               cat inventory
-              ORCHESTRATION_USER="$(whoami)" PROJECT_BASENAME=$PROJECT_BASENAME ansible-playbook -v -i inventory workloads/logging.yml -v --tags delete_indices,delete_indices_req,clear_buffers,cleanup
+              ORCHESTRATION_USER="$(whoami)" PROJECT_BASENAME=$PROJECT_BASENAME ansible-playbook -v -i inventory workloads/logging.yml -v --tags delete_indices,delete_indices_req,clear_buffers,cleanup || echo "Success even if playbook fails"
               '''
             }
           }
