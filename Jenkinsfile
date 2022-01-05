@@ -66,7 +66,15 @@ pipeline {
 
               echo -e "[orchestration]\nlocalhost ansible_connection=local" > inventory
               cat inventory
-              ORCHESTRATION_USER="$(whoami)" PROJECT_BASENAME=$PROJECT_BASENAME ansible-playbook -v -i inventory workloads/logging.yml -v --tags delete_indices,delete_indices_req,clear_buffers,cleanup || echo "Success even if playbook fails"
+              TAGS="delete_indices,delete_indices_req,clear_buffers"
+              if oc get projects | grep -q "^$PROJECT_BASENAME"; then
+                TAGS+=",cleanup"
+                echo "Projects found to delete:"
+                oc get projects | grep "^$PROJECT_BASENAME"
+              else
+                echo "No projects found to cleanup, skipping project deletion step"
+              fi
+              ORCHESTRATION_USER="$(whoami)" PROJECT_BASENAME=$PROJECT_BASENAME ansible-playbook -v -i inventory workloads/logging.yml -v --tags $TAGS
               '''
             }
           }
