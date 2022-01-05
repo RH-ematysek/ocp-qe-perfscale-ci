@@ -82,7 +82,7 @@ pipeline {
               ls -la
 
               if [ -n $LABEL_NODES_INSTANCETYPE ]; then
-                for i in $(oc get machines -n openshift-machine-api -o json | jq -r '.items[] | select(.spec.providerSpec.value.instanceType == env.LABEL_NODES_INSTANCETYPE and .metadata.labels."machine.openshift.io/cluster-api-machine-role" != "master").status.nodeRef.name'); do oc label node "$i" placement=logtest; done
+                for i in $(oc get machines -n openshift-machine-api -o json | jq -r '.items[] | select(.spec.providerSpec.value.instanceType == env.LABEL_NODES_INSTANCETYPE and .metadata.labels."machine.openshift.io/cluster-api-machine-role" != "master").status.nodeRef.name'); do oc label node --overwrite "$i" placement=logtest; done
               fi
 
               echo -e "[orchestration]\nlocalhost ansible_connection=local" > inventory
