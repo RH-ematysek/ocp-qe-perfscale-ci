@@ -11,6 +11,7 @@ pipeline {
 
   parameters {
         string(name: 'BUILD_NUMBER', defaultValue: '', description: 'Build number of job that has installed the cluster.')
+        string(name: 'PROJECT_BASENAME', defaultValue:'logtest', description:'Project name prefix. Will oc delete all projects matching $PROJECT_BASENAME*')
         string(name:'JENKINS_AGENT_LABEL',defaultValue:'oc49 || oc48 || oc47')
         text(name: 'ENV_VARS', defaultValue: '', description:'''<p>
                Enter list of additional (optional) Env Vars you'd want to pass to the script, one pair on each line. <br>
