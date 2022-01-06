@@ -79,15 +79,6 @@ pipeline {
             }
           }
         }
-        stage('Placeholder'){
-          steps{
-            ansiColor('xterm') {
-              sh label: '', script: '''
-              echo "run test"
-              '''
-            }
-          }
-        }
       }
     }
 
