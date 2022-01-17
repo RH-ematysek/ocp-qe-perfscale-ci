@@ -54,7 +54,9 @@ pipeline {
         }
         stage('Checkout repo'){
           steps{
-            git branch: params.LOGGING_HELPER_REPO_BRANCH, url: params.LOGGING_HELPER_REPO
+            dir('logging-helper'){
+              git branch: params.LOGGING_HELPER_REPO_BRANCH, url: params.LOGGING_HELPER_REPO
+            }
           }
         }
         stage('Source ENV/kubeconfig and run workload'){
@@ -79,6 +81,7 @@ pipeline {
               whoami
 
               ls -la
+              ls logging-helper
 
 
               '''
