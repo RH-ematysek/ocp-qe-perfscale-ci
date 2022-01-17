@@ -28,7 +28,8 @@ pipeline {
                ...<br>
                SOMEVARn='envn-test'<br>
                </p>'''
-            )
+        )
+        booleanParam(name: 'DEBUG', defaultValue: true)
     }
 
   stages {
@@ -60,6 +61,9 @@ pipeline {
           }
         }
         stage('Debug info'){
+          when {
+            environment name: 'DEBUG', value: 'true'
+          }
           steps{
             ansiColor('xterm') {
               sh label: '', script: '''
