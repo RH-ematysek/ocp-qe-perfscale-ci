@@ -59,7 +59,7 @@ pipeline {
             }
           }
         }
-        stage('Source ENV/kubeconfig and run workload'){
+        stage('Debug info'){
           steps{
             ansiColor('xterm') {
               sh label: '', script: '''
