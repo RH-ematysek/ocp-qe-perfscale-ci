@@ -29,7 +29,7 @@ pipeline {
                SOMEVARn='envn-test'<br>
                </p>'''
         )
-        booleanParam(name: 'DEBUG', defaultValue: true)
+        booleanParam(name: 'DEBUG', defaultValue: false)
     }
 
   stages {
@@ -87,6 +87,44 @@ pipeline {
               ls -la
               ls openshift-logtest-helper
 
+
+              '''
+            }
+          }
+        }
+        stage('Scale Machinesets'){
+          when {
+            environment name: 'DEBUG', value: 'true'
+          }
+          steps{
+            ansiColor('xterm') {
+              sh label: '', script: '''
+              # Get ENV VARS Supplied by the user to this job and store in .env_override
+              echo "$ENV_VARS" > .env_override
+              # Export those env vars so they could be used by CI Job
+              set -a && source .env_override && set +a
+              mkdir -p ~/.kube
+              cp $WORKSPACE/flexy-artifacts/workdir/install-dir/auth/kubeconfig ~/.kube/config
+              ls -la
+
+              '''
+            }
+          }
+        }
+        stage('Deploy Logging'){
+          when {
+            environment name: 'DEBUG', value: 'true'
+          }
+          steps{
+            ansiColor('xterm') {
+              sh label: '', script: '''
+              # Get ENV VARS Supplied by the user to this job and store in .env_override
+              echo "$ENV_VARS" > .env_override
+              # Export those env vars so they could be used by CI Job
+              set -a && source .env_override && set +a
+              mkdir -p ~/.kube
+              cp $WORKSPACE/flexy-artifacts/workdir/install-dir/auth/kubeconfig ~/.kube/config
+              ls -la
 
               '''
             }
