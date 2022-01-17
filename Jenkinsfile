@@ -54,7 +54,7 @@ pipeline {
         }
         stage('Checkout repo'){
           steps{
-            dir('logging-helper'){
+            dir('openshift-logtest-helper'){
               git branch: params.LOGGING_HELPER_REPO_BRANCH, url: params.LOGGING_HELPER_REPO
             }
           }
@@ -81,7 +81,7 @@ pipeline {
               whoami
 
               ls -la
-              ls logging-helper
+              ls openshift-logtest-helper
 
 
               '''
