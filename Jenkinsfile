@@ -11,9 +11,15 @@ pipeline {
 
   parameters {
         string(name: 'BUILD_NUMBER', defaultValue: '', description: 'Build number of job that has installed the cluster.')
+        booleanParam(name: 'SCALE_MACHINESETS', defaultValue: false, description: 'Scale worker machinesets to 0, update instance type as specified, then scale up.')
+        string(name: 'ELS_INSTANCE_TYPE', defaultValue: 'm6i.2xlarge', description: '')
+        string(name: 'FLUENTD_INSTANCE_TYPE', defaultValue: 'm6i.xlarge', description: '')
+        string(name: 'NUM_FLUENTD_NODES', defaultValue: '1', description: '')
+        booleanParam(name: 'DEPLOY_LOGGING', defaultValue: true, description: 'Deploy cluster loging operator and elasticsearch operator')
+        string(name: 'CLO_BRANCH', defaultValue: 'release-5.3', description: 'Branch to deploy Cluster Logging Operator and Elasticsearch Operator from. See https://github.com/openshift/cluster-logging-operator')
         string(name: 'JENKINS_AGENT_LABEL',defaultValue:'oc49 || oc48 || oc47')
-        string(name: 'WORKLOADS_REPO', defaultValue:'https://github.com/RH-ematysek/workloads', description:'You can change this to point to your fork if needed.')
-        string(name: 'WORKLOADS_REPO_BRANCH', defaultValue:'logtest_v45_svt', description:'You can change this to point to a branch on your fork if needed.')
+        string(name: 'LOGGING_HELPER_REPO', defaultValue:'https://github.com/RH-ematysek/openshift-logtest-helper', description:'You can change this to point to your fork if needed.')
+        string(name: 'LOGGING_HELPER_REPO_BRANCH', defaultValue:'master', description:'You can change this to point to a branch on your fork if needed.')
         text(name: 'ENV_VARS', defaultValue: '', description:'''<p>
                Enter list of additional (optional) Env Vars you'd want to pass to the script, one pair on each line. <br>
                e.g.<br>
@@ -46,9 +52,9 @@ pipeline {
             }
           }
         }
-        stage('Checkout workload repo'){
+        stage('Checkout repo'){
           steps{
-            git branch: params.WORKLOADS_REPO_BRANCH, url: params.WORKLOADS_REPO
+            git branch: params.LOGGING_HELPER_REPO_BRANCH, url: params.LOGGING_HELPER_REPO
           }
         }
         stage('Source ENV/kubeconfig and run workload'){
