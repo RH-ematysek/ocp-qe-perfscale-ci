@@ -94,7 +94,7 @@ pipeline {
         }
         stage('Scale Machinesets'){
           when {
-            environment name: 'DEBUG', value: 'true'
+            environment name: 'SCALE_MACHINESETS', value: 'true'
           }
           steps{
             ansiColor('xterm') {
@@ -114,7 +114,7 @@ pipeline {
         }
         stage('Deploy Logging'){
           when {
-            environment name: 'DEBUG', value: 'true'
+            environment name: 'DEPLOY_LOGGING', value: 'true'
           }
           steps{
             ansiColor('xterm') {
