@@ -17,6 +17,7 @@ pipeline {
         string(name: 'NUM_FLUENTD_NODES', defaultValue: '1', description: '')
         booleanParam(name: 'DEPLOY_LOGGING', defaultValue: true, description: 'Deploy cluster loging operator and elasticsearch operator')
         string(name: 'CLO_BRANCH', defaultValue: 'release-5.3', description: 'Branch to deploy Cluster Logging Operator and Elasticsearch Operator from. See https://github.com/openshift/cluster-logging-operator')
+        booleanParam(name: 'CREATE_CLO_INSTANCE', defaultValue: true, description: 'Create CLO instance with ELS 4 cpu, 16G RAM, and 200G gp2 ssd storage.')
         string(name: 'JENKINS_AGENT_LABEL',defaultValue:'oc49 || oc48 || oc47')
         string(name: 'LOGGING_HELPER_REPO', defaultValue:'https://github.com/RH-ematysek/openshift-logtest-helper', description:'You can change this to point to your fork if needed.')
         string(name: 'LOGGING_HELPER_REPO_BRANCH', defaultValue:'master', description:'You can change this to point to a branch on your fork if needed.')
@@ -112,7 +113,7 @@ pipeline {
             }
           }
         }
-        stage('Deploy Logging'){
+        stage('Deploy Logging/Elasticsearch Operators'){
           when {
             environment name: 'DEPLOY_LOGGING', value: 'true'
           }
@@ -128,6 +129,33 @@ pipeline {
               ls -la
               cd openshift-logtest-helper
               ./deploy_logging.sh "$CLO_BRANCH"
+              '''
+            }
+          }
+        }
+        stage('Create CLO Instance'){
+          when {
+            environment name: 'CREATE_CLO_INSTANCE', value: 'true'
+          }
+          steps{
+            ansiColor('xterm') {
+              sh label: '', script: '''
+              # Get ENV VARS Supplied by the user to this job and store in .env_override
+              echo "$ENV_VARS" > .env_override
+              # Export those env vars so they could be used by CI Job
+              set -a && source .env_override && set +a
+              mkdir -p ~/.kube
+              cp $WORKSPACE/flexy-artifacts/workdir/install-dir/auth/kubeconfig ~/.kube/config
+              ls -la
+              cd openshift-logtest-helper
+              if [ -e templates/ol-2xlarge.yaml ]; then
+                oc create -f templates/ol-2xlarge.yaml
+                echo "TODO: Sleep until elasticsearch is ready"
+                oc get pods -n openshift-logging
+              else
+                echo "Template not found"
+                exit 1
+              fi
               '''
             }
           }
