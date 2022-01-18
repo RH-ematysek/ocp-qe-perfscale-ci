@@ -106,7 +106,8 @@ pipeline {
               mkdir -p ~/.kube
               cp $WORKSPACE/flexy-artifacts/workdir/install-dir/auth/kubeconfig ~/.kube/config
               ls -la
-
+              cd openshift-logtest-helper
+              ./prep_machinesets.sh
               '''
             }
           }
