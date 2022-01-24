@@ -62,15 +62,20 @@ pipeline {
           }
         }
         stage('Copy Artifacts'){
-          when {
-            not { environment name: "BUILD_NUMBER", value: "" }
-          }
           steps {
+            script {
+            buildno = ""
+              if(params.BUILD_NUMBER == "") {
+                buildno = install.number.toString()
+              } else {
+                buildno = params.BUILD_NUMBER
+              }
+            }
             copyArtifacts(
               filter: '',
               fingerprintArtifacts: true,
               projectName: 'ocp-common/Flexy-install',
-              selector: specific(params.BUILD_NUMBER),
+              selector: specific(buildno),
               target: 'flexy-artifacts'
             )
           }
