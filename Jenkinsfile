@@ -42,40 +42,24 @@ pipeline {
       agent { label params['JENKINS_AGENT_LABEL'] }
       stages{
         stage('Build Cluster'){
-          when {
-            environment name: "BUILD_NUMBER", value: ""
-          }
-          steps {
-            script {
-              install = build job:"ocp-common/Flexy-install", parameters: [string(name: 'INSTANCE_NAME_PREFIX', value: "${params.INSTANCE_NAME_PREFIX}"),
-                string(name: 'VARIABLES_LOCATION', value: "${params.VARIABLES_LOCATION}"),
-                text(name: 'LAUNCHER_VARS', value: "installer_payload_image: ${params.INSTALLER_PAYLOAD_IMAGE}"),
-                text(name: 'BUSHSLICER_CONFIG', value: '''services:
-  AWS-CI:
-    config_opts:
-      region: us-east-2'''),
-                string(name: 'JENKINS_AGENT_LABEL', value: "${params.JENKINS_AGENT_LABEL}")
-              ]
-            }
-          }
-        }
-        stage('Copy Artifacts'){
           steps {
             script {
               buildno = ""
               if(params.BUILD_NUMBER == "") {
+                install = build job:"ocp-common/Flexy-install", parameters: [string(name: 'INSTANCE_NAME_PREFIX', value: "${params.INSTANCE_NAME_PREFIX}"),
+                  string(name: 'VARIABLES_LOCATION', value: "${params.VARIABLES_LOCATION}"),
+                  text(name: 'LAUNCHER_VARS', value: "installer_payload_image: ${params.INSTALLER_PAYLOAD_IMAGE}"),
+                  text(name: 'BUSHSLICER_CONFIG', value: '''services:
+  AWS-CI:
+    config_opts:
+      region: us-east-2'''),
+                  string(name: 'JENKINS_AGENT_LABEL', value: "${params.JENKINS_AGENT_LABEL}")
+                ]
                 buildno = install.number.toString()
               } else {
                 buildno = params.BUILD_NUMBER
               }
             }
-            copyArtifacts(
-              filter: '',
-              fingerprintArtifacts: true,
-              projectName: 'ocp-common/Flexy-install',
-              selector: specific(buildno),
-              target: 'flexy-artifacts'
-            )
           }
         }
         stage('Prep Cluster'){
