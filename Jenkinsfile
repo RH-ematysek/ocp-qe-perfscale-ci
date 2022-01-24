@@ -11,7 +11,7 @@ pipeline {
 
   parameters {
         // Build cluster
-        string(name: 'BUILD_NUMBER', defaultValue: '', description: 'Leave blank if building cluster as part of e2e. Build number of job that has installed the cluster.')
+        string(name: 'BUILD_NUMBER', defaultValue: '---', description: 'Leave blank if building cluster as part of e2e. Build number of job that has installed the cluster.')
         string(name: 'INSTANCE_NAME_PREFIX', defaultValue: 'logtest', description: '')
         string(name: 'VARIABLES_LOCATION', defaultValue: 'private-templates/functionality-testing/aos-4_10/ipi-on-aws/versioned-installer', description: '')
         string(name: 'INSTALLER_PAYLOAD_IMAGE', defaultValue: 'registry.ci.openshift.org/ocp/release:4.10.0-fc.2', description: '')
