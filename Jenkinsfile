@@ -16,15 +16,13 @@ pipeline {
         string(name: 'VARIABLES_LOCATION', defaultValue: 'private-templates/functionality-testing/aos-4_10/ipi-on-aws/versioned-installer', description: '')
         string(name: 'INSTALLER_PAYLOAD_IMAGE', defaultValue: 'registry.ci.openshift.org/ocp/release:4.10.0-fc.2', description: '')
         // Prep cluster
-        booleanParam(name: 'SCALE_MACHINESETS', defaultValue: false, description: 'Scale worker machinesets to 0, update instance type as specified, then scale up. machineset A is scaled for elasticsearch, B is scaled for fluentd, and all other machinesets are scaled down to 0')
+        booleanParam(name: 'SCALE_MACHINESETS', defaultValue: true, description: 'Scale worker machinesets to 0, update instance type as specified, then scale up. machineset A is scaled for elasticsearch, B is scaled for fluentd, and all other machinesets are scaled down to 0')
         string(name: 'ELS_INSTANCE_TYPE', defaultValue: 'm6i.2xlarge', description: '')
         string(name: 'FLUENTD_INSTANCE_TYPE', defaultValue: 'm6i.xlarge', description: '')
-        string(name: 'NUM_FLUENTD_NODES', defaultValue: '1', description: '')
+        string(name: 'NUM_FLUENTD_NODES', defaultValue: '5', description: '')
         booleanParam(name: 'DEPLOY_LOGGING', defaultValue: true, description: 'Deploy cluster loging operator and elasticsearch operator')
         string(name: 'CLO_BRANCH', defaultValue: 'release-5.3', description: 'Branch to deploy Cluster Logging Operator and Elasticsearch Operator from. See https://github.com/openshift/cluster-logging-operator')
         booleanParam(name: 'CREATE_CLO_INSTANCE', defaultValue: true, description: 'Create CLO instance with ELS 4 cpu, 16G RAM, and 200G gp2 ssd storage.')
-        string(name: 'LOGGING_HELPER_REPO', defaultValue:'https://github.com/RH-ematysek/openshift-logtest-helper', description:'You can change this to point to your fork if needed.')
-        string(name: 'LOGGING_HELPER_REPO_BRANCH', defaultValue:'master', description:'You can change this to point to a branch on your fork if needed.')
 
         // Global
         string(name: 'JENKINS_AGENT_LABEL',defaultValue:'oc49 || oc48 || oc47')
@@ -64,7 +62,7 @@ pipeline {
         stage('Copy Artifacts'){
           steps {
             script {
-            buildno = ""
+              buildno = ""
               if(params.BUILD_NUMBER == "") {
                 buildno = install.number.toString()
               } else {
@@ -78,6 +76,22 @@ pipeline {
               selector: specific(buildno),
               target: 'flexy-artifacts'
             )
+          }
+        }
+        stage('Prep Cluster'){
+          steps {
+            script {
+              build job: 'scale-ci/ematysek-e2e-benchmark/logging-prep-cluster', parameters: [string(name: 'BUILD_NUMBER', value: "${buildno}"),
+                booleanParam(name: 'SCALE_MACHINESETS', value: "${params.SCALE_MACHINESETS}"),
+                string(name: 'ELS_INSTANCE_TYPE', value: "${params.ELS_INSTANCE_TYPE}"),
+                string(name: 'FLUENTD_INSTANCE_TYPE', value: "${params.FLUENTD_INSTANCE_TYPE}"),
+                string(name: 'NUM_FLUENTD_NODES', value: "${params.NUM_FLUENTD_NODES}"),
+                booleanParam(name: 'DEPLOY_LOGGING', value: "${params.DEPLOY_LOGGING}"),
+                string(name: 'CLO_BRANCH', value: "${params.CLO_BRANCH}"),
+                booleanParam(name: 'CREATE_CLO_INSTANCE', value: "${params.CREATE_CLO_INSTANCE}"),
+                string(name: 'JENKINS_AGENT_LABEL', value: "${params.JENKINS_AGENT_LABEL}")
+              ]
+            }
           }
         }
       }
