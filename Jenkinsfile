@@ -27,6 +27,8 @@ pipeline {
         choice(name: 'TEST_PRESET', choices: ['NONE', 'SINGLE_NODE_2K', 'SINGLE_NODE_2500', 'MULTI_NODE_10K'], description: 'Preset test cases. Overrides NUM_PROJECTS, RATE, and NUM_LINES')
         string(name: 'PROJECT_BASENAME', defaultValue:'logtest', description:'Project name prefix')
         string(name: 'LABEL_NODES_INSTANCETYPE', defaultValue:'m6i.xlarge', description:'Instance type to label with placement=logtest. This label indicates which nodes will have logtest pods assigned to them. Leave blank to skip this step. Note: labels ALL non master nodes that match the instance type')
+        // Cleanup
+        booleanParam(name: 'CLEANUP_LOGGING', defaultValue: true, description: 'Delete logtest projects, elasticsearch app index, and clear fluentd buffers')
 
         // Global
         string(name: 'JENKINS_AGENT_LABEL',defaultValue:'oc49 || oc48 || oc47')
@@ -87,11 +89,25 @@ pipeline {
           steps {
             script {
               build job: 'scale-ci/ematysek-e2e-benchmark/logging', parameters: [string(name: 'BUILD_NUMBER', value: "${buildno}"),
-              string(name: 'TEST_PRESET', value: "${params.TEST_PRESET}"),
+                string(name: 'TEST_PRESET', value: "${params.TEST_PRESET}"),
+                string(name: 'PROJECT_BASENAME', value: "${params.PROJECT_BASENAME}"),
+                string(name: 'LABEL_NODES_INSTANCETYPE', value: "${params.LABEL_NODES_INSTANCETYPE}"),
+                text(name: 'ENV_VARS', value: "${params.ENV_VARS}"),
+                string(name: 'JENKINS_AGENT_LABEL', value: "${params.JENKINS_AGENT_LABEL}")
+              ]
+            }
+          }
+        }
+        stage('Cleanup'){
+        when {
+          environment name: "CLEANUP_LOGGING", value: 'true'
+        }
+          steps{
+            script {
+              build job: 'scale-ci/ematysek-e2e-benchmark/logging-cleanup', parameters: [string(name: 'BUILD_NUMBER', value: "${buildno}"),
               string(name: 'PROJECT_BASENAME', value: "${params.PROJECT_BASENAME}"),
-              string(name: 'LABEL_NODES_INSTANCETYPE', value: "${params.LABEL_NODES_INSTANCETYPE}"),
-              text(name: 'ENV_VARS', value: "${params.ENV_VARS}"),
-              string(name: 'JENKINS_AGENT_LABEL', value: "${params.JENKINS_AGENT_LABEL}")
+                text(name: 'ENV_VARS', value: "${params.ENV_VARS}"),
+                string(name: 'JENKINS_AGENT_LABEL', value: "${params.JENKINS_AGENT_LABEL}")
               ]
             }
           }
