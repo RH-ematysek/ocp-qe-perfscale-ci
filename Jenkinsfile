@@ -70,6 +70,13 @@ pipeline {
           }
         }
         stage('Prep Cluster'){
+          when {
+            anyOf {
+              environment name: "SCALE_MACHINESETS", value: 'true'
+              environment name: "DEPLOY_LOGGING", value: 'true'
+              environment name: "CREATE_CLO_INSTANCE", value: 'true'
+            }
+          }
           steps {
             script {
               build job: 'scale-ci/ematysek-e2e-benchmark/logging-prep-cluster', parameters: [string(name: 'BUILD_NUMBER', value: "${buildno}"),
