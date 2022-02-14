@@ -66,7 +66,7 @@ pipeline {
               echo -e "[orchestration]\nlocalhost ansible_connection=local" > inventory
               cat inventory
               TAGS="delete_indices,delete_indices_req,clear_buffers"
-              if oc get projects | grep -qE "^$PROJECT_BASENAME +Active"; then
+              if oc get projects | grep -qE "^$PROJECT_BASENAME.+Active"; then
                 TAGS+=",cleanup"
                 echo "Projects found to delete:"
                 oc get projects | grep "^$PROJECT_BASENAME"
