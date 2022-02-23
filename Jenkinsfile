@@ -14,7 +14,7 @@ pipeline {
         string(name: 'BUILD_NUMBER', defaultValue: '---', description: 'Leave blank if building cluster as part of e2e. Build number of job that has installed the cluster.')
         string(name: 'INSTANCE_NAME_PREFIX', defaultValue: 'e2elogging', description: '')
         string(name: 'VARIABLES_LOCATION', defaultValue: 'private-templates/functionality-testing/aos-4_10/ipi-on-aws/versioned-installer', description: '')
-        string(name: 'INSTALLER_PAYLOAD_IMAGE', defaultValue: 'registry.ci.openshift.org/ocp/release:4.10.0-fc.2', description: '')
+        string(name: 'INSTALLER_PAYLOAD_IMAGE', defaultValue: 'registry.ci.openshift.org/ocp/release:4.10.0-rc.4', description: '')
         // Prep cluster
         booleanParam(name: 'SCALE_MACHINESETS', defaultValue: true, description: 'Scale worker machinesets to 0, update instance type as specified, then scale up. machineset A is scaled for elasticsearch, B is scaled for fluentd, and all other machinesets are scaled down to 0')
         string(name: 'ELS_INSTANCE_TYPE', defaultValue: 'm6i.2xlarge', description: '')
