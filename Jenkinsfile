@@ -28,7 +28,7 @@ pipeline {
         choice(name: 'TEST_PRESET', choices: ['NONE', 'SINGLE_POD_2K', 'SINGLE_POD_2500', 'SINGLE_NODE_NULTI_POD_2500', 'MULTI_NODE_10K'], description: 'Preset test cases. Overrides NUM_PROJECTS, RATE, and NUM_LINES')
         string(name: 'PROJECT_BASENAME', defaultValue:'logtest', description:'Project name prefix')
         string(name: 'LABEL_NODES_INSTANCETYPE', defaultValue:'m6i.xlarge', description:'Instance type to label with placement=logtest. This label indicates which nodes will have logtest pods assigned to them. Leave blank to skip this step. Note: labels ALL non master nodes that match the instance type')
-        string(name: 'QUERY_PATH', defaultValue:'kubernetes.namespace_name', description:'This is passed into the elasticsearch query. Schema was updated in logging 5.5 to kubernetes.pod_namespace')
+        string(name: 'QUERY_PATH', defaultValue:'kubernetes.namespace_name', description:'This is passed into the elasticsearch query. Schema is kubernetes.pod_namespace in vector. Should be fixed in GA.')
         // Cleanup
         booleanParam(name: 'CLEANUP_LOGGING', defaultValue: true, description: 'Delete logtest projects, elasticsearch app index, and clear fluentd buffers')
 
