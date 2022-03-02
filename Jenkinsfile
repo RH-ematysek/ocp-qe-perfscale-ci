@@ -19,6 +19,8 @@ pipeline {
         string(name: 'PROJECT_BASENAME', defaultValue:'logtest', description:'Project name prefix')
         string(name: 'LABEL_NODES_INSTANCETYPE', defaultValue:'m6i.xlarge', description:'Instance type to label with placement=logtest. This label indicates which nodes will have logtest pods assigned to them. Leave blank to skip this step. Note: labels ALL non master nodes that match the instance type')
         string(name: 'QUERY_PATH', defaultValue:'kubernetes.namespace_name', description:'This is passed into the elasticsearch query. Schema is kubernetes.pod_namespace in vector. Should be fixed in GA.')
+        // Cleanup
+        booleanParam(name: 'CLEANUP_LOGGING', defaultValue: true, description: 'Delete logtest projects, elasticsearch app index, and clear fluentd buffers')
         string(name: 'WORKLOADS_REPO', defaultValue:'https://github.com/RH-ematysek/workloads', description:'You can change this to point to your fork if needed.')
         string(name: 'WORKLOADS_REPO_BRANCH', defaultValue:'logtest_v45_svt', description:'You can change this to point to a branch on your fork if needed.')
         text(name: 'ENV_VARS', defaultValue: '', description:'''<p>
@@ -101,6 +103,20 @@ pipeline {
                 ORCHESTRATION_USER="$(whoami)" LABEL_ALL_NODES=False NUM_PROJECTS=$NUM_PROJECTS NUM_LINES=$NUM_LINES RATE=$RATE PROJECT_BASENAME=$PROJECT_BASENAME QUERY_PATH=$QUERY_PATH ansible-playbook -v -i inventory workloads/logging.yml -v --skip-tags label_node,clear_buffers,delete_indices
               fi
               '''
+            }
+          }
+        }
+        stage('Cleanup'){
+        when {
+          environment name: "CLEANUP_LOGGING", value: 'true'
+        }
+          steps{
+            script {
+              build job: 'scale-ci/ematysek-e2e-benchmark/logging-cleanup', parameters: [string(name: 'BUILD_NUMBER', value: "${params.BUILD_NUMBER}"),
+              string(name: 'PROJECT_BASENAME', value: "${params.PROJECT_BASENAME}"),
+                text(name: 'ENV_VARS', value: "${params.ENV_VARS}"),
+                string(name: 'JENKINS_AGENT_LABEL', value: "${params.JENKINS_AGENT_LABEL}")
+              ]
             }
           }
         }
