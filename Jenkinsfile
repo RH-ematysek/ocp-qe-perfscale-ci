@@ -103,6 +103,7 @@ pipeline {
                 string(name: 'PROJECT_BASENAME', value: "${params.PROJECT_BASENAME}"),
                 string(name: 'LABEL_NODES_INSTANCETYPE', value: "${params.LABEL_NODES_INSTANCETYPE}"),
                 string(name: 'QUERY_PATH', value: "${params.QUERY_PATH}"),
+                booleanParam(name: 'CLEANUP_LOGGING', value: 'false'),
                 text(name: 'ENV_VARS', value: "${params.ENV_VARS}"),
                 string(name: 'JENKINS_AGENT_LABEL', value: "${params.JENKINS_AGENT_LABEL}")
               ]
