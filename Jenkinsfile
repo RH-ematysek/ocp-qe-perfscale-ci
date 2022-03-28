@@ -14,15 +14,16 @@ pipeline {
         string(name: 'BUILD_NUMBER', defaultValue: '---', description: 'Leave blank if building cluster as part of e2e. Build number of job that has installed the cluster.')
         string(name: 'INSTANCE_NAME_PREFIX', defaultValue: 'e2elogging', description: '')
         string(name: 'VARIABLES_LOCATION', defaultValue: 'private-templates/functionality-testing/aos-4_10/ipi-on-aws/versioned-installer', description: '')
-        string(name: 'INSTALLER_PAYLOAD_IMAGE', defaultValue: 'registry.ci.openshift.org/ocp/release:4.10.4', description: '')
+        string(name: 'INSTALLER_PAYLOAD_IMAGE', defaultValue: 'registry.ci.openshift.org/ocp/release:4.10.6', description: '')
         // Prep cluster
         booleanParam(name: 'SCALE_MACHINESETS', defaultValue: true, description: 'Scale worker machinesets to 0, update instance type as specified, then scale up. machineset A is scaled for elasticsearch, B is scaled for fluentd, and all other machinesets are scaled down to 0')
         string(name: 'ELS_INSTANCE_TYPE', defaultValue: 'm6i.2xlarge', description: '')
-        string(name: 'FLUENTD_INSTANCE_TYPE', defaultValue: 'm6i.xlarge', description: '')
-        string(name: 'NUM_FLUENTD_NODES', defaultValue: '5', description: '')
+        string(name: 'COLLECTOR_INSTANCE_TYPE', defaultValue: 'm6i.xlarge', description: '')
+        string(name: 'NUM_LOGTEST_NODES', defaultValue: '5', description: '')
         booleanParam(name: 'DEPLOY_LOGGING', defaultValue: true, description: 'Deploy cluster loging operator and elasticsearch operator')
         string(name: 'CLO_BRANCH', defaultValue: 'release-5.4', description: 'Branch to deploy Cluster Logging Operator and Elasticsearch Operator from. See https://github.com/openshift/cluster-logging-operator')
         booleanParam(name: 'CREATE_CLO_INSTANCE', defaultValue: true, description: 'Create CLO instance with ELS 4 cpu, 16G RAM, and 200G gp2 ssd storage.')
+        choice(name: 'LOG_COLLECTOR', choices: ['fluentd', 'vector'], description: 'Log collector to use.')
         string(name: 'SLEEP_DELAY', defaultValue: "10m", description: 'Time to sleep after previous steps to wait for nodes/CLO to be ready. Leave empty to skip')
         // Workload
         choice(name: 'TEST_PRESET', choices: ['NONE', 'SINGLE_POD_2K', 'SINGLE_POD_2500', 'SINGLE_NODE_NULTI_POD_2500', 'MULTI_NODE_10K'], description: 'Preset test cases. Overrides NUM_PROJECTS, RATE, and NUM_LINES')
@@ -83,8 +84,8 @@ pipeline {
               build job: 'scale-ci/ematysek-e2e-benchmark/logging-prep-cluster', parameters: [string(name: 'BUILD_NUMBER', value: "${buildno}"),
                 booleanParam(name: 'SCALE_MACHINESETS', value: "${params.SCALE_MACHINESETS}"),
                 string(name: 'ELS_INSTANCE_TYPE', value: "${params.ELS_INSTANCE_TYPE}"),
-                string(name: 'FLUENTD_INSTANCE_TYPE', value: "${params.FLUENTD_INSTANCE_TYPE}"),
-                string(name: 'NUM_FLUENTD_NODES', value: "${params.NUM_FLUENTD_NODES}"),
+                string(name: 'COLLECTOR_INSTANCE_TYPE', value: "${params.COLLECTOR_INSTANCE_TYPE}"),
+                string(name: 'NUM_LOGTEST_NODES', value: "${params.NUM_LOGTEST_NODES}"),
                 booleanParam(name: 'DEPLOY_LOGGING', value: "${params.DEPLOY_LOGGING}"),
                 string(name: 'CLO_BRANCH', value: "${params.CLO_BRANCH}"),
                 booleanParam(name: 'CREATE_CLO_INSTANCE', value: "${params.CREATE_CLO_INSTANCE}"),
