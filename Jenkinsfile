@@ -89,6 +89,7 @@ pipeline {
                 booleanParam(name: 'DEPLOY_LOGGING', value: "${params.DEPLOY_LOGGING}"),
                 string(name: 'CLO_BRANCH', value: "${params.CLO_BRANCH}"),
                 booleanParam(name: 'CREATE_CLO_INSTANCE', value: "${params.CREATE_CLO_INSTANCE}"),
+                string(name: 'LOG_COLLECTOR', value: "${params.LOG_COLLECTOR}"),
                 string(name: 'SLEEP_DELAY', value: "${params.SLEEP_DELAY}"),
                 text(name: 'ENV_VARS', value: "${params.ENV_VARS}"),
                 string(name: 'JENKINS_AGENT_LABEL', value: "${params.JENKINS_AGENT_LABEL}")
